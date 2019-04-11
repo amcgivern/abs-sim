@@ -1,0 +1,27 @@
+
+d_theta = 0; % change in angle
+d_t = 0.0005; % change in time
+% v_rx = r * wheelAng - v * cos(alpha); % relative x velocity
+% v_ry = v * sin(alpha); % relative y velocity
+% v_r = sqrt(v_rx * v_rx + v_ry * v_ry); % relative velocity
+v_r = r * wheelAng - v; % relative velocity
+L = 0.25;  % m ;  the length of the contact patch
+r = 0.25; % m ;  effective tire radius at free rolling
+v_0 = 20; % m/s ; initial velocity
+v = v_0; % velocity of wheel ; initialize to initial velocity
+N = 20; % number of bristles (may need to be increased)
+wheelAng = v / r;  % wheel angular velocity
+z = zeros(N);
+
+% Deflection variables (z)
+for i = 2:N
+    z[i] = v_r - r * abs(wheelAng) * ((N - 1) / L) * (z[i] - z[i-1]);
+    disp(z[i]);
+end
+    
+    
+    
+    
+    
+    
+    

@@ -1,4 +1,9 @@
-function [mu_avg,Tmax] = ABS_sim(a,b,q_n)
+sys = tf(massTot * g / M* p * p + d * p + k); % transfer function
+F = (T0 * p + 1) / (1/Kw * massWheel * T * p * p + (p(Kv * massWheel * 1/massTot * 1/Kw * T0 + T0) + 1));
+[y,t_arr] = lsim(sys,u,t_arr);
+% y = tire vibrations
+plot(t_arr,y);
+function [mu_avg,Tmax] = Deur_sim(a,b,q_n)
 % a: rising slope of braking moment T, b: falling slope, q_n=2 if good road conditions,otherwise-bad road conditions
 % no delay, no status 0 , no constant T
 p=0.5;q=[-0.0625 0.1125]; % mu(0)=0, mu(0.2)=0.1,mu(1)=0.05,bad r.cond (a),
@@ -18,6 +23,13 @@ wl_0=v_0 %initial wheel center linear velocity 100km/h and rotational velocity s
 g=9.81; % [m/s^2]
 m=150; %vehicle mass [kg]
 
+T0 = 0.00125; % seconds
+T = 0.00051; % seconds
+massWheel = 3.75; % kg
+massTot = 500;  % kg
+Kw = 120;
+Kv = 120;
+
 % (Canudas, 2002) 
 sig0 = 181.54; % 1/m ; stiffness coefficient
 sig1 = 1 % 1 / m ; rubber longitudinal lumped damping
@@ -29,10 +41,6 @@ vs = 6.57 % m/s ; Stribeck relative velocity
 dt=0.001; % change in time step over simulation
 
 s=0;v=v_0;w=w_0;wl=wl_0;T=0;t=0;  % T-braking torque
-
-L = 0.25;  % m ;  the length of the contact patch
-N = 20; % number of bristles (may need to be increased)
-Z = zeros(1, N); % array of the deflection values
 
 int_T_dt=[0 0]; %The first stores integral of T dt and second one stores the previous value of T
 int_mu_dt=[0 0]; %The first stores integral of mu dt and second one stores the previous value of mu
@@ -92,19 +100,14 @@ while cyc<2000  %To avoid infinite loops
     int_T_dt(1) = int_T_dt(1) + dt*(T+int_T_dt(2))/2; %Trapezoidal integration
     int_T_dt(2)=T;                                                          %Updating values
     
+    v = -1*g*int_mu_dt(1) + v_0;                % linear movement eq:  m*dv/dt=(m*g)*mu   integration
   %  w = (1/I)*(m*g*r*int_mu_dt(1) - int_T_dt(1)) + w_0 ;%  rotational movement eq: %  I(dw/dt)=(mg)r(mu)-T   integration
    % z = (sign(v) * r * w) - abs(v) / abs(v); % the internal friction state ; zeta1 - zeta0 / zeta0
    s = (v - r*w+vx)/v;                            %slip
     vr = (r * w) - v; % m/s ; relative velocity
-    v = -1*g*int_mu_dt(1) + v_0;                % linear movement eq:  m*dv/dt=(m*g)*mu   integration
 
-    for i = 2:N
-        Z(i) = vr - r * abs(w) * ((N - 1) / L) * (Z(i) - Z(i-1)); % v should be v_r
-        disp(Z(i))
-    end
-    z = mean(Z);
    gVr = MUc + ((MUs - MUc) * exp(- abs(vr / vs)^ alpha));
-   zPrime = vr - ((sig0 * abs(vr) / gVr)* z) ;
+   zPrime = vr - ((sig0 * abs(vr) / gVr)* s);
   %zPrime = abs(vr) * 
    w = ((1/I)*(m*g*r*int_mu_dt(1) - int_T_dt(1)) + w_0) * (sig0 * s + sig1 * zPrime + sig2 * vr);  %  rotational movement eq: %  I(dw/dt)=(mg)r(mu)-T   integration  
   vx=(x-x0)/dt ;
@@ -179,3 +182,4 @@ subplot(2,2,3);plot(t_arr,s_arr,'-',t_arr,mu_arr,'-')     ;title('s and mu vs t'
 subplot(2,2,4);plot(t_arr,st_arr,'-','LineWidth',1);title('T control vs t');xlabel('t');ylabel('-1  0  +1');
 
 end
+

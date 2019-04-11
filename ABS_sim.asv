@@ -30,9 +30,7 @@ dt=0.001; % change in time step over simulation
 
 s=0;v=v_0;w=w_0;wl=wl_0;T=0;t=0;  % T-braking torque
 
-L = 0.25;  % m ;  the length of the contact patch
-N = 20; % number of bristles (may need to be increased)
-Z = zeros(1, N); % array of the deflection values
+Z = zeros(1, N); % array of the 
 
 int_T_dt=[0 0]; %The first stores integral of T dt and second one stores the previous value of T
 int_mu_dt=[0 0]; %The first stores integral of mu dt and second one stores the previous value of mu
@@ -92,19 +90,18 @@ while cyc<2000  %To avoid infinite loops
     int_T_dt(1) = int_T_dt(1) + dt*(T+int_T_dt(2))/2; %Trapezoidal integration
     int_T_dt(2)=T;                                                          %Updating values
     
+    v = -1*g*int_mu_dt(1) + v_0;                % linear movement eq:  m*dv/dt=(m*g)*mu   integration
   %  w = (1/I)*(m*g*r*int_mu_dt(1) - int_T_dt(1)) + w_0 ;%  rotational movement eq: %  I(dw/dt)=(mg)r(mu)-T   integration
    % z = (sign(v) * r * w) - abs(v) / abs(v); % the internal friction state ; zeta1 - zeta0 / zeta0
    s = (v - r*w+vx)/v;                            %slip
     vr = (r * w) - v; % m/s ; relative velocity
-    v = -1*g*int_mu_dt(1) + v_0;                % linear movement eq:  m*dv/dt=(m*g)*mu   integration
-
     for i = 2:N
-        Z(i) = vr - r * abs(w) * ((N - 1) / L) * (Z(i) - Z(i-1)); % v should be v_r
+        Z(i) = v - r * abs(wheelAng) * ((N - 1) / L) * (Z(i) - Z(i-1)); % v should be v_r
         disp(Z(i))
     end
-    z = mean(Z);
+    avgZ = mean(Z);
    gVr = MUc + ((MUs - MUc) * exp(- abs(vr / vs)^ alpha));
-   zPrime = vr - ((sig0 * abs(vr) / gVr)* z) ;
+   zPrime = vr - ((sig0 * abs(vr) / gVr)* s);
   %zPrime = abs(vr) * 
    w = ((1/I)*(m*g*r*int_mu_dt(1) - int_T_dt(1)) + w_0) * (sig0 * s + sig1 * zPrime + sig2 * vr);  %  rotational movement eq: %  I(dw/dt)=(mg)r(mu)-T   integration  
   vx=(x-x0)/dt ;
