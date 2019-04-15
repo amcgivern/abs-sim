@@ -50,7 +50,6 @@ dt=0.001;
 
 s=0;v=v_0;w=w_0;wl=wl_0;T=0;t=0;  % T-braking torque
 
-% Preallocate for speed here using zeroes.... !!!!!!!!!!!!!!!!!!!!!
 int_T_dt=[0 0]; %The first stores integral of T dt and second one stores the previous value of T
 int_mu_dt=[0 0]; %The first stores integral of mu dt and second one stores the previous value of mu
 %mu - traction coefficient mu(s), s- slip
@@ -161,9 +160,9 @@ while cyc<2000  %To avoid infinite loops
     if(T==0 && s==0)
         status=1;
     end
-    if(s > 0.99)
-        break
-    end
+  %  if(s > 0.99)
+   %     break
+   % end
     
     % update arrays with the current value for later plotting
     vx_arr(end+1)=vx;
@@ -197,9 +196,9 @@ figure
 plot(t_arr, w_arr, 'r-');title("Wheel Angular Velocity v over Time");xlabel('Time (t) ');ylabel('Wheel Angular Velocity (w) ')
 %       plot(T_arr, yT, 'r-');title("Tire Vibrations y vs Torque");xlabel('T');ylabel('y ')
 figure
-plot(t_arr,v_arr,'-', t_arr,wl_arr, 'b-' , t_arr,vx_arr, '-','LineWidth',0.5);title('v and wl  and vx vs t');xlabel('t');ylabel('w and V');
+plot(t_arr,v_arr,'-', t_arr,wl_arr, 'b-' , t_arr,vx_arr, '-',  'LineWidth',0.5);title('v and wl  and vx vs t');xlabel('t');ylabel('w and V');
 figure
-plot(t_arr,T_arr,'-');title('T  vs t');xlabel('t');ylabel('T');
+plot(t_arr,T_arr,'-');                                   title('T  vs t');xlabel('t');ylabel('T');
 figure
 plot(t_arr,s_arr,'-',t_arr,mu_arr,'-')     ;title('s and mu vs t');xlabel('t');ylabel('s mu');
 figure
